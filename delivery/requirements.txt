@@ -1,0 +1,10 @@
+django
+djangorestframework
+uritemplate
+pyyaml
+pytils
+Pillow
+django-phone-field
+requests
+gunicorn 
+psycopg2-binary

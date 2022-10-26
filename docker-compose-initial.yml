@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    environment:
+      - DOMAIN
+      - EMAIL
+    depends_on:
+      - nginx
+    command: >- 
+             certonly --reinstall --webroot --webroot-path=/var/www/certbot
+             --email ${EMAIL} --agree-tos --no-eff-email
+             -d ${DOMAIN}
+  nginx:
+    restart: always
+    build: 
+      context: ./nginx/initial
+    environment:
+      - DOMAIN
+      - EMAIL
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+volumes:
+  certbot_conf:
+  certbot_www:
+  certbot_lib:
+  
+  
+  

@@ -1,0 +1,80 @@
+version: '3.9'
+services:
+
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    depends_on:
+      - nginx
+  
+  nginx:
+    restart: always
+    build: 
+      context: ./nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      - DOMAIN
+    env_file:
+      - ./env_file/.nginx.env
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+      - django_static:/var/www/static
+      - django_media:/var/www/media
+    depends_on:
+      django:
+        condition: service_healthy
+  
+  bot:
+    restart: always
+    build: 
+      context: ./delivery_bot
+    env_file:
+      - ./env_file/.bot.env
+    depends_on:
+      django:
+        condition: service_healthy
+
+  django:
+    restart: always
+    build:
+      context: ./delivery
+    volumes:
+      - django_static:/var/www/static
+      - django_media:/var/www/media
+    environment:
+      - DOMAIN
+    env_file: 
+      - ./env_file/.django.env
+    depends_on:
+      - postgre
+    command: >
+      sh -c "./delivery/wait-for-postgres.sh postgre &&
+            gunicorn -w 3 --chdir ./ delivery.wsgi --bind 0.0.0.0:8000"
+    healthcheck:
+      test: curl --fail http://django:8000 || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+  
+  postgre:
+    restart: always
+    image: postgres
+    env_file: ./env_file/.pg.env
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  certbot_conf:
+  certbot_www:
+  certbot_lib:
+  db:
+  django_static:
+  django_media:
+  
