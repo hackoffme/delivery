@@ -10,6 +10,8 @@ delivery_bot/.vscode
 delivery_bot/config/.settings
 
 delivery/media/img
+delivery/delivery/settings_dev.py
+
 
 .vscode
 
