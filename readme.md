@@ -10,7 +10,7 @@
 
 Загрузисте проект
 ```
-git clone 
+git clone https://github.com/hackoffme/delivery.git
 ```
 Затем зайдите в папку ./env_file и уберите из имени всех файлов _EXAMPLE. Заполните все файлы в соответствии с коментариями в них.
 Аналогично сделайте с файлом ./.env_EXAMPLE
