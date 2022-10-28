@@ -58,7 +58,7 @@ python manage.py collectstatic
 #Загружаем в бд тестовые данные
 python manage.py load
 #Делаем ссылку на фото
-cp -r -l ./media/old /var/www/
+cp -r  ./media/old /var/www/media
 ```
 
 Закрываем консоль контейнера и завершаем работу django командой `docker-compose down`

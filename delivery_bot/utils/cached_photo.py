@@ -1,3 +1,4 @@
+import logging
 from aiogram import types
 
 class CachedPhoto():
@@ -7,7 +8,11 @@ class CachedPhoto():
     def get(self, url):
         if url in self._data:
             return self._data[url]
-        return types.URLInputFile(url)
+        try:
+            photo = types.URLInputFile(url)
+        except:
+            return None
+        return photo
 
     def update(self, url, id):
         if url not in self._data:
