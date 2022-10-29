@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = False
 
 # telegram msg
-TOKEN = SECRET_KEY = os.environ.get('TOKEN')
+TOKEN = SECRET_KEY = os.environ.get('TOKEN_ADMIN_GROUP')
 CHANEL = os.environ.get('CHANEL')
 
 SECRET_KEY = os.environ.get('SECRET_KEY')

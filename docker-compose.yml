@@ -9,6 +9,9 @@ services:
       - certbot_www:/var/www/certbot
     depends_on:
       - nginx
+    environment:
+      - DOMAIN=$DOMAIN
+      - EMAIL=$EMAIL
   
   nginx:
     restart: always
@@ -17,10 +20,6 @@ services:
     ports:
       - '80:80'
       - '443:443'
-    environment:
-      - DOMAIN
-    env_file:
-      - ./env_file/.nginx.env
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
@@ -29,16 +28,25 @@ services:
     depends_on:
       django:
         condition: service_healthy
+    environment:
+      - DOMAIN=$DOMAIN
   
   bot:
     restart: always
     build: 
       context: ./delivery_bot
-    env_file:
-      - ./env_file/.bot.env
     depends_on:
       django:
         condition: service_healthy
+    environment:
+      - APP_BASE_URL=$APP_BASE_URL
+      - TOKEN=$TOKEN
+      - API_URL=$API_URL
+      - API_USER=$API_USER
+      - API_PASSWORD=$API_PASSWORD
+      - TZ=$TZ
+      - TIME_START=$TIME_START
+      - TIME_END=$TIME_END
 
   django:
     restart: always
@@ -47,10 +55,6 @@ services:
     volumes:
       - django_static:/var/www/static
       - django_media:/var/www/media
-    environment:
-      - DOMAIN
-    env_file: 
-      - ./env_file/.django.env
     depends_on:
       - postgre
     command: >
@@ -62,13 +66,25 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    environment:
+      - DOMAIN=$DOMAIN
+      - SECRET_KEY=$SECRET_KEY
+      - PG_HOST=$PG_HOST
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - TOKEN_ADMIN_GROUP=$TOKEN_ADMIN_GROUP
+      - CHANEL=$CHANEL
   
   postgre:
     restart: always
     image: postgres
-    env_file: ./env_file/.pg.env
     volumes:
       - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 
 volumes:
   certbot_conf:

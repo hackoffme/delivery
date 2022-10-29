@@ -6,8 +6,8 @@ services:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
     environment:
-      - DOMAIN
-      - EMAIL
+      - DOMAIN=$DOMAIN
+      - EMAIL=$EMAIL
     depends_on:
       - nginx
     command: >- 
@@ -19,8 +19,8 @@ services:
     build: 
       context: ./nginx/initial
     environment:
-      - DOMAIN
-      - EMAIL
+      - DOMAIN=$DOMAIN
+      - EMAIL=$EMAIL
     ports:
       - '80:80'
       - '443:443'
