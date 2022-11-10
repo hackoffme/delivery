@@ -1,3 +1,4 @@
+import dataclasses
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram import Router
@@ -9,6 +10,7 @@ from repositories.open_api import api_io
 from keyboards.delivery import get_keyboard_phone, get_keyboard_confirm_order
 from keyboards.start import get_keyboard_start, allowed_commands
 from utils.cart import Cart
+from utils.models import User
 
 router = Router()
 
@@ -18,7 +20,8 @@ async def by(c: types.CallbackQuery, state: FSMContext, callback_data: ActionCal
     try:
         user = api_io.call_retrieveCustomerTg(
             parameters={'tg_id': c.from_user.id})
-        await state.update_data({'user': user})
+        user = User(tg_id=user.tg_id, address=user.address, phone=user.phone)
+        await state.update_data({'user': dataclasses.asdict(user)})
     except UnexpectedResponseError:
         await state.set_state(Order.set_address)
         await c.message.answer('Введите адрес')
@@ -51,7 +54,8 @@ async def get_phone(m: types.Message, state: FSMContext):
     except UnexpectedResponseError:
         user = api_io.call_updateCustomerTg(
             parameters={'tg_id': m.from_user.id}, data=q)
-    await state.update_data({'user': user})
+    user = User(tg_id=user.tg_id, address=user.address, phone=user.phone)
+    await state.update_data({'user': dataclasses.asdict(user)})
     await m.answer('Адрес и телефон сохранены', reply_markup=get_keyboard_start())
     await state.set_state(Order.choose_of_goods)
     await confirmation_order(m, user, state)
@@ -65,8 +69,8 @@ async def edit_address(c: types.CallbackQuery, state: FSMContext):
 
 
 async def confirmation_order(m: types.Message, user, state: FSMContext):
-    cart = (await state.get_data()).get('cart')
-    if not cart:
+    cart = Cart.loads((await state.get_data()).get('cart', None))
+    if not cart.items:
         await m.answer('Ошибка формирования заказа, корзина пуста. Попробуйте еще раз')
         return
     if not user:
@@ -79,10 +83,10 @@ async def confirmation_order(m: types.Message, user, state: FSMContext):
 @router.callback_query(ActionCallbackFactory.filter(F.action == 'conf'))
 async def confirmed_order(c: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    user = data.get('user')
-    items: Cart = data.get('cart')
+    user = User(**data.get('user'))
+    items: Cart = Cart.loads(data.get('cart'))
     
-    if not items:
+    if not items.items:
         await c.message.answer('Ошибка формирования заказа, корзина пуста. Попробуйте еще раз')
         return
     if not user:

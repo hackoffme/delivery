@@ -1,16 +1,14 @@
 import logging
 from os import getenv
-
 from aiohttp.web import run_app
 from aiohttp.web_app import Application
 
 from aiogram import Bot, Dispatcher
-from aiogram.types import MenuButtonWebApp, WebAppInfo
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiogram.fsm.storage.redis import Redis, RedisStorage
 
 from handlers import other, start, menu, cart, order, history, about
 from middleware.worktime import WorkTime
-
 
 
 TELEGRAM_TOKEN = getenv("TOKEN")
@@ -24,7 +22,8 @@ async def on_shutdown(dispatcher: Dispatcher, bot: Bot):
     await bot.delete_webhook()
 
 def register_dp():
-    dp = Dispatcher()
+    # dp = Dispatcher(storage=RedisStorage())
+    dp = Dispatcher(storage=RedisStorage.from_url(url='redis://redis:6379/db'))
     dp["base_url"] = APP_BASE_URL
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)

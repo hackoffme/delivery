@@ -1,4 +1,3 @@
-from enum import unique
 from phone_field import PhoneField
 
 from django.db import models

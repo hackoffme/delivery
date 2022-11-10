@@ -1,3 +1,4 @@
+import pickle
 from contextlib import suppress
 from aiogram import types, Router, exceptions
 from aiogram.fsm.context import FSMContext
@@ -16,14 +17,14 @@ router = Router()
 @router.callback_query(Order.choose_of_goods, MenuCallbackFactory.filter(F.action.in_({'up', 'down'})))
 async def add_cart(c: types.CallbackQuery, state: FSMContext, callback_data: MenuCallbackFactory):
     data = await state.get_data()
-    cart = data.get('cart', None) or Cart(api_io)
+    cart = Cart.loads(data=data.get('cart', None))
     if callback_data.action == 'up':
         count = cart.add(
             (callback_data.item, callback_data.size), callback_data.price)
     else:
         count = cart.remove((callback_data.item, callback_data.size))
 
-    await state.update_data({'cart': cart})
+    await state.update_data({'cart': cart.dumps()})
 
     product = api_io.call_retrieveProducts(
         parameters={'id': callback_data.item})
@@ -39,7 +40,7 @@ async def view_cart(m: types.Message, state: FSMContext):
     if 'cart' not in data:
         await m.reply('Корзина пуста')
         return
-    cart = data['cart']
+    cart = Cart.loads(data['cart'])
     await m.answer(cart.view(), reply_markup=get_keyboard_cart())
 
 
@@ -50,7 +51,7 @@ async def edit_cart(c: types.CallbackQuery, state: FSMContext):
         await c.message.reply('Корзина пуста')
         await c.answer()
         return
-    cart = data['cart']
+    cart = Cart.loads(data['cart'])
     sent = []
     for item in cart.items:
         if item[0] in sent:

@@ -52,19 +52,20 @@ services:
     restart: always
     build:
       context: ./delivery
+    entrypoint: ["wait-for-postgres.sh", "postgre"]
     volumes:
       - django_static:/var/www/static
       - django_media:/var/www/media
     depends_on:
       - postgre
-    command: >
-      sh -c "./delivery/wait-for-postgres.sh postgre &&
-            gunicorn -w 3 --chdir ./ delivery.wsgi --bind 0.0.0.0:8000"
+    # command: >
+    #   sh -c "./delivery/wait-for-postgres.sh postgre &&
+    #         gunicorn -w 3 --chdir ./ delivery.wsgi --bind 0.0.0.0:8000"
     healthcheck:
       test: curl --fail http://django:8000 || exit 1
       interval: 5s
       timeout: 5s
-      retries: 5
+      # retries: 5
       start_period: 15s
     environment:
       - DOMAIN=$DOMAIN
@@ -86,6 +87,11 @@ services:
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+
 volumes:
   certbot_conf:
   certbot_www:
@@ -93,4 +99,5 @@ volumes:
   db:
   django_static:
   django_media:
+  redis_data:
   

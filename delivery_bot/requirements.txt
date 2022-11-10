@@ -2,3 +2,5 @@ openapi3
 pydantic
 pydantic[dotenv]
 aiogram==3.0.0b4
+redis
+pickle-mixin

@@ -29,5 +29,5 @@ class OrderViewList(viewsets.mixins.ListModelMixin,
             raise exceptions.NotFound
         tg_id = self.kwargs[self.lookup_url_kwarg]
         tg_id = self.kwargs['tg_id']
-        ret = models.Orders.objects.filter(customer__tg_id=tg_id).all().order_by('-id')[:10]
+        ret = models.Orders.objects.filter(customer__tg_id=tg_id).all().order_by('-id')[:5]
         return ret

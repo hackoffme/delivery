@@ -3,6 +3,7 @@
 
 set -e
   
+# host="$1"
 host="$1"
 # Shift arguments with mapping:
 # - $0 => $0
@@ -23,4 +24,4 @@ done
 >&2 echo "Postgres is up - executing command"
 # Print and execute all other arguments starting with `$1`
 # So `exec "$1" "$2" "$3" ...`
-exec "$@"
+exec entrypoint.sh "$@"
