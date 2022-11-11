@@ -5,6 +5,7 @@ from menu.models import Base, Products, Price
 
 class CustomersTg(Base):
     tg_id = models.IntegerField(unique=True,
+                                db_index=True,
                                 verbose_name='ID пользователя telegram')
     address = models.CharField(max_length=250,
                                verbose_name='Адрес доставки')
@@ -41,6 +42,7 @@ class OrderItems(Base):
 class Orders(Base):
     customer = models.ForeignKey(CustomersTg,
                                  on_delete=models.CASCADE,
+                                 db_index=True,
                                  verbose_name='Заказчик')
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Создание')

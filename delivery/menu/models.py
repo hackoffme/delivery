@@ -14,7 +14,7 @@ class Base(models.Model):
 class Categories(Base):
     name = models.CharField(max_length=200, verbose_name='Категория')
     emoji = models.CharField(max_length=2, blank=True, null=True, verbose_name='Эмодзи')
-    slug = models.SlugField(max_length=200, unique=True, verbose_name='slug')
+    slug = models.SlugField(max_length=200, unique=True, db_index=True, verbose_name='slug')
 
     def __str__(self) -> str:
         return self.name
@@ -50,6 +50,7 @@ class Products(Base):
                             verbose_name='Название блюда')
     slug = models.SlugField(max_length=200,
                             unique=True,
+                            db_index=True,
                             verbose_name='slug')
     category = models.ForeignKey(Categories,
                                  on_delete=models.CASCADE,
@@ -62,41 +63,31 @@ class Products(Base):
                               blank=True,
                               verbose_name='Фотография')
     aviable = models.BooleanField(default=True,
+                                  db_index=True,
                                   verbose_name='Доступно для заказа')
     
-    # def save(self, *args, **kwargs):
-    #     super().save(*args, **kwargs)
-        
-    #     image = Image.open(self.image.path)
-        
-        
-    #     fixed_width = 600
-    #     width_percent = fixed_width / float(image.size[0])
-    #     height_size = int(image.size[1] * fixed_width / float(image.size[0]))
-    #     image = image.resize((fixed_width, height_size)).convert()
-        
-    #     image.save(self.image.path, quality=80, optimize=True)
-        
-
-
-
     def __str__(self) -> str:
         return self.name
 
     class Meta:
         verbose_name = 'Блюдо'
         verbose_name_plural = 'Меню'
+        index_together = [
+            ['category', 'aviable']
+        ]
 
 
 class Price(Base):
     product = models.ForeignKey(Products,
                                 on_delete=models.CASCADE,
+                                db_index=True,
                                 related_name='price',
                                 verbose_name='Продукт')
     slug = models.SlugField(max_length=200,
                             unique=True,
+                            db_index=True,
                             verbose_name='slug')
-    size = models.CharField(max_length=30, verbose_name='Размер блюбда')
+    size = models.CharField(max_length=30, db_index=True, verbose_name='Размер блюбда')
     price = models.DecimalField(max_digits=10,
                                 decimal_places=2,
                                 verbose_name='Цена')
@@ -104,6 +95,9 @@ class Price(Base):
     class Meta:
         verbose_name = 'Цена'
         verbose_name_plural = 'Цены'
+        index_together = [
+            ['product', 'size']
+        ]
 
     def __str__(self):
         return f'{self.product.name}>>{self.size}>>{self.price}'
