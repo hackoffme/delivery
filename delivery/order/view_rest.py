@@ -17,17 +17,19 @@ class OrderCreate(generics.CreateAPIView):
     serializer_class = serializers.OrderCreateSerializer
 
 
-class OrderViewList(viewsets.mixins.ListModelMixin, 
-                               viewsets.GenericViewSet):
+class OrderViewList(viewsets.mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
     lookup_url_kwarg = 'tg_id'
     serializer_class = serializers.OrderViewSerializer
-    
+
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
     def get_queryset(self):
         if self.lookup_url_kwarg not in self.kwargs:
             raise exceptions.NotFound
         tg_id = self.kwargs[self.lookup_url_kwarg]
         tg_id = self.kwargs['tg_id']
-        ret = models.Orders.objects.filter(customer__tg_id=tg_id).all().order_by('-id')[:5]
+        ret = models.Orders.objects.filter(
+            customer__tg_id=tg_id).all().order_by('-id')[:5]
         return ret

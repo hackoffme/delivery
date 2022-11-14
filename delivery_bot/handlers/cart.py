@@ -1,4 +1,3 @@
-import pickle
 from contextlib import suppress
 from aiogram import types, Router, exceptions
 from aiogram.fsm.context import FSMContext
@@ -11,6 +10,7 @@ from keyboards.cart import get_keyboard_cart
 from utils.cart import Cart
 from utils.send import send_item
 from states.order import Order
+from utils.text import split_text
 router = Router()
 
 
@@ -19,6 +19,9 @@ async def add_cart(c: types.CallbackQuery, state: FSMContext, callback_data: Men
     data = await state.get_data()
     cart = Cart.loads(data=data.get('cart', None))
     if callback_data.action == 'up':
+        if cart.len() >= 30:
+            await c.answer('Не более 30 позиций в одном заказе', show_alert=True)
+            return
         count = cart.add(
             (callback_data.item, callback_data.size), callback_data.price)
     else:
@@ -40,8 +43,10 @@ async def view_cart(m: types.Message, state: FSMContext):
     if 'cart' not in data:
         await m.reply('Корзина пуста')
         return
+    await m.answer('считаем...')
     cart = Cart.loads(data['cart'])
-    await m.answer(cart.view(), reply_markup=get_keyboard_cart())
+    for item in split_text(cart.view()):
+        await m.answer(item, reply_markup=get_keyboard_cart())
 
 
 @router.callback_query(Order.choose_of_goods, ActionCallbackFactory.filter(F.action == 'edit'))
@@ -65,5 +70,8 @@ async def edit_cart(c: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(Order.choose_of_goods, ActionCallbackFactory.filter(F.action == 'erase'))
 async def erase_cart(c: types.CallbackQuery, state: FSMContext):
-    await state.set_data(data={})
+    data = await state.get_data()
+    if 'cart' in data:
+        data.pop('cart')
+    await state.set_data(data)
     await c.answer('Корзина очищена')

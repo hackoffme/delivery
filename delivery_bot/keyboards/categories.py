@@ -22,7 +22,7 @@ def get_keyboard_item(data, basket=None):
         count = 0
         if basket and (data.id, item.id) in basket.items.keys():
             count = basket.items[(data.id, item.id)]
-            
+
         message = f'Цена: {int(item.price)} | Вес: {item.size}'
         if count:
             message = f'Кол-во {count} {message}'
@@ -42,4 +42,3 @@ def get_keyboard_item(data, basket=None):
                                                          action='up'))
     builder.adjust(1, 2, repeat=True)
     return builder.as_markup()
-

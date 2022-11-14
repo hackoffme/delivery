@@ -1,8 +1,6 @@
 from contextlib import suppress
-
 from aiogram import types, exceptions
 
-import logging
 from keyboards.categories import get_keyboard_item
 from utils.cached_photo import cache_photo
 
@@ -17,7 +15,7 @@ async def send_item(m: types.Message, data, basket=None, edit=False):
         if photo:
             with suppress(exceptions.TelegramBadRequest):
                 r = await m.answer_photo(cache_photo.get(data.image),
-                                        caption=caption, reply_markup=kb)
+                                         caption=caption, reply_markup=kb)
 
                 cache_photo.update(data.image, r.photo[-1].file_id)
             return

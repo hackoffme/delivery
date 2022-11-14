@@ -52,6 +52,7 @@ services:
     restart: always
     build:
       context: ./delivery
+    # entrypoint: ["entrypoint.sh"]
     entrypoint: ["wait-for-postgres.sh", "postgre"]
     volumes:
       - django_static:/var/www/static

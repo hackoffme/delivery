@@ -22,7 +22,7 @@ DATABASES = {
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': os.environ.get('PG_HOST'),
-        'PORT': '', 
+        'PORT': '',
         'CONN_MAX_AGE': 600
     }
 }
@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'order.apps.OrderConfig'
 
 ]
-
 MIDDLEWARE = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -55,7 +54,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
+    'middleware.cache.FetchFromCacheResetCacheMiddleware',
+
 ]
 
 ROOT_URLCONF = 'delivery.urls'
@@ -77,7 +78,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'delivery.wsgi.application'
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -162,4 +162,4 @@ CACHE_MIDDLEWARE_ALIAS = 'default'
 CACHE_MIDDLEWARE_KEY_PREFIX = ''
 
 # Cache key TTL in seconds
-CACHE_MIDDLEWARE_SECONDS = 3600
+CACHE_MIDDLEWARE_SECONDS = 3600*24*7

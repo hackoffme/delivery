@@ -6,7 +6,7 @@ from .models import Categories, Products, Price
 class PriceInline(admin.StackedInline):
     model = Price
     extra = 1
-    prepopulated_fields = {'slug': ('product','size')}
+    prepopulated_fields = {'slug': ('product', 'size')}
 
 
 @admin.register(Products)

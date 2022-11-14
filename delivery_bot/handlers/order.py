@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram import Router
 from magic_filter import F
 from openapi3.errors import UnexpectedResponseError
+
 from callback.menu import ActionCallbackFactory
 from states.order import Order
 from repositories.open_api import api_io
@@ -11,6 +12,7 @@ from keyboards.delivery import get_keyboard_phone, get_keyboard_confirm_order
 from keyboards.start import get_keyboard_start, allowed_commands
 from utils.cart import Cart
 from utils.models import User
+from utils.text import split_text
 
 router = Router()
 
@@ -35,7 +37,7 @@ async def get_address(m: types.Message, state: FSMContext):
     if m.text.lower() in allowed_commands:
         await m.answer('Отправьте адрес сообщением')
         return
-    await state.update_data({'address': m.text})
+    await state.update_data({'address': m.text[0:500]})
     await m.answer('Нажмите кнопку поделиться телефоном', reply_markup=get_keyboard_phone())
     await state.set_state(Order.choose_of_goods)
     await state.set_state(Order.set_phone)
@@ -77,7 +79,8 @@ async def confirmation_order(m: types.Message, user, state: FSMContext):
         await m.answer('Ошибка получения данных пользователя. Заполните еще раз адрес и имя')
         return
     ret = f'Ваш адрес: {user.address}\nВаш телефон: {user.phone}\n{cart.view()}'
-    await m.answer(ret, reply_markup=get_keyboard_confirm_order())
+    for item in split_text(ret):
+        await m.answer(item, reply_markup=get_keyboard_confirm_order())
 
 
 @router.callback_query(ActionCallbackFactory.filter(F.action == 'conf'))
@@ -85,19 +88,19 @@ async def confirmed_order(c: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     user = User(**data.get('user'))
     items: Cart = Cart.loads(data.get('cart'))
-    
+
     if not items.items:
-        await c.message.answer('Ошибка формирования заказа, корзина пуста. Попробуйте еще раз')
+        await c.message.answer('Ошибка формирования заказа, корзина пуста. Добавьте товар в корзину')
         return
     if not user:
         await c.message.answer('Ошибка получения данных пользователя. Заполните еще раз адрес и имя')
         return
-    
+
     order = {
         "customer": user.tg_id,
         "items": items.data_for_send()
     }
-    try:    
+    try:
         ret = api_io.call_createOrderCreate(data=order)
         await c.message.answer('Ваш заказ поступил в обработку. Ожидайте звонка менеджера')
         await state.set_data({})
@@ -105,5 +108,5 @@ async def confirmed_order(c: types.CallbackQuery, state: FSMContext):
         await c.message.answer('Проблема с отправкой заказа. Попробуйте еще или позвоните нам')
     finally:
         await state.set_state(state=Order.choose_of_goods)
-        
+
     await c.answer()

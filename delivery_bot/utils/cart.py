@@ -16,6 +16,9 @@ class Cart:
     
     def dumps(self):
         return base64.b64encode(pickle.dumps(self)).decode('ascii')
+    
+    def len(self):
+        return len(self.items)
         
 
     def add(self, key, price=0):
@@ -40,13 +43,13 @@ class Cart:
         self.items = {}
 
     def view(self):
-        ret = 'В корзине:'
+        ret = 'В корзине:\n'
         for item, count in self.items.items():
             product = api_io.call_retrieveProducts(
                 parameters={'id': item[0]})
             size = filter(lambda x: x.id == item[1], product.price).__next__()
-            ret = f'{ret}\n{product.name} {size.size}.<code> кол-во: {count} x цена: {size.price} = {count*size.price}</code>'
-        ret = f'{ret}\n <code>Итоговая сумма: {self.get_total()}</code>'
+            ret += f'<code>{product.name} {size.size}. {count} x {size.price} = {count*size.price}</code>\n'
+        ret += f'Итоговая сумма: {self.get_total()}'
         return ret
 
     def data_for_send(self):

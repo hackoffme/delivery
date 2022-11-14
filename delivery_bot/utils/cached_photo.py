@@ -1,5 +1,5 @@
-import logging
 from aiogram import types
+
 
 class CachedPhoto():
     def __init__(self):
@@ -18,5 +18,5 @@ class CachedPhoto():
         if url not in self._data:
             self._data.update({url: id})
 
-cache_photo = CachedPhoto()
 
+cache_photo = CachedPhoto()

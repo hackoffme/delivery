@@ -6,3 +6,5 @@ class MyConfig(AppConfig):
     name = 'menu'
     verbose_name = 'Меню'
     
+    def ready(self) -> None:
+        from . import signals

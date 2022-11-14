@@ -16,11 +16,6 @@ touch $LOG_ACCESS
 
 cd $DIR
 
-# export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
-# exec gunicorn -w 3 --chdir ./ delivery.wsgi --bind 0.0.0.0:8000
-
-
-
 exec gunicorn delivery.wsgi:application \
   --name $NAME \
   --workers $WORKERS \
@@ -30,4 +25,4 @@ exec gunicorn delivery.wsgi:application \
   --error-logfile=$LOG_ERR \
   --access-logfile=$LOG_ACCESS \
   --chdir ./ \
-  --capture-output 
+  --capture-output
