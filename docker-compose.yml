@@ -67,7 +67,7 @@ services:
     depends_on:
       - postgre
     healthcheck:
-      test: curl http://pizza_django:8000 || exit 1
+      test: curl http://${COMPOSE_PROJECT_NAME}_django:8000 || exit 1
       interval: 5s
       timeout: 5s
       # retries: 5
