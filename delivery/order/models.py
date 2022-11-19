@@ -5,7 +5,7 @@ from menu.models import Base, Price
 
 
 class CustomersTg(Base):
-    tg_id = models.IntegerField(unique=True,
+    tg_id = models.BigIntegerField(unique=True,
                                 db_index=True,
                                 verbose_name='ID пользователя telegram')
     address = models.CharField(max_length=250,

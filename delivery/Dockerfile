@@ -16,3 +16,4 @@ COPY ./wait-for-postgres.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/wait-for-postgres.sh
+

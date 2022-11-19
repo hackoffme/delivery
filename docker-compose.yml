@@ -1,12 +1,13 @@
 version: '3.9'
 services:
-
   certbot:
     image: certbot/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    container_name: ${COMPOSE_PROJECT_NAME}_certbot
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
+      - certbot_lib:/var/lib/letsencrypt
     depends_on:
       - nginx
     environment:
@@ -17,9 +18,10 @@ services:
     restart: always
     build: 
       context: ./nginx
+    container_name: ${COMPOSE_PROJECT_NAME}_nginx
     ports:
-      - '80:80'
-      - '443:443'
+      - $PORT:$PORT
+      - $PORT_SSL:$PORT_SSL
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
@@ -30,11 +32,15 @@ services:
         condition: service_healthy
     environment:
       - DOMAIN=$DOMAIN
+      - PORT=$PORT
+      - PORT_SSL=$PORT_SSL
+      - COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
   
   bot:
     restart: always
     build: 
       context: ./delivery_bot
+    container_name: ${COMPOSE_PROJECT_NAME}_bot
     depends_on:
       django:
         condition: service_healthy
@@ -47,23 +53,21 @@ services:
       - TZ=$TZ
       - TIME_START=$TIME_START
       - TIME_END=$TIME_END
+      - REDIS_BOT=$REDIS_BOT
 
   django:
     restart: always
     build:
       context: ./delivery
-    # entrypoint: ["entrypoint.sh"]
-    entrypoint: ["wait-for-postgres.sh", "postgre"]
+    entrypoint: ["wait-for-postgres.sh", "${COMPOSE_PROJECT_NAME}_postgre"]
+    container_name: ${COMPOSE_PROJECT_NAME}_django
     volumes:
       - django_static:/var/www/static
       - django_media:/var/www/media
     depends_on:
       - postgre
-    # command: >
-    #   sh -c "./delivery/wait-for-postgres.sh postgre &&
-    #         gunicorn -w 3 --chdir ./ delivery.wsgi --bind 0.0.0.0:8000"
     healthcheck:
-      test: curl --fail http://django:8000 || exit 1
+      test: curl http://pizza_django:8000 || exit 1
       interval: 5s
       timeout: 5s
       # retries: 5
@@ -77,10 +81,12 @@ services:
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
       - TOKEN_ADMIN_GROUP=$TOKEN_ADMIN_GROUP
       - CHANEL=$CHANEL
+      - REDIS_CACHE=$REDIS_CACHE
   
   postgre:
     restart: always
     image: postgres
+    container_name: ${COMPOSE_PROJECT_NAME}_postgre
     volumes:
       - db:/var/lib/postgresql/data
     environment:
@@ -90,6 +96,7 @@ services:
 
   redis:
     image: redis:alpine
+    container_name: ${COMPOSE_PROJECT_NAME}_redis
     volumes:
       - redis_data:/data
 

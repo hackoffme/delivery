@@ -3,14 +3,13 @@ import logging
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DEBUG = False
 
 # telegram msg
 TOKEN = SECRET_KEY = os.environ.get('TOKEN_ADMIN_GROUP')
 CHANEL = os.environ.get('CHANEL')
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
-ALLOWED_HOSTS = ['djangoin', 'django', os.environ.get('DOMAIN')]
+ALLOWED_HOSTS = ['djangoin', 'django', os.environ.get('DOMAIN'), f"{os.getenv('COMPOSE_PROJECT_NAME')}_django"]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
@@ -46,7 +45,7 @@ INSTALLED_APPS = [
 
 ]
 MIDDLEWARE = [
-    'django.middleware.cache.UpdateCacheMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',
-    'middleware.cache.FetchFromCacheResetCacheMiddleware',
+    # 'middleware.cache.FetchFromCacheResetCacheMiddleware',
 
 ]
 
@@ -118,7 +117,7 @@ REST_FRAMEWORK = {
 }
 
 
-LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
+LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'debug').upper()
 
 LOGGING = {
     'version': 1,
@@ -148,18 +147,20 @@ LOGGING = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",
+        "LOCATION": os.getenv("REDIS_CACHE"),
+        # "LOCATION": "redis://redis:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
 
-# Key in `CACHES` dict
-CACHE_MIDDLEWARE_ALIAS = 'default'
+# # Key in `CACHES` dict
+# CACHE_MIDDLEWARE_ALIAS = 'default'
 
-# Additional prefix for cache keys
-CACHE_MIDDLEWARE_KEY_PREFIX = ''
+# # Additional prefix for cache keys
+# CACHE_MIDDLEWARE_KEY_PREFIX = ''
 
-# Cache key TTL in seconds
-CACHE_MIDDLEWARE_SECONDS = 3600*24*7
+# # Cache key TTL in seconds
+# CACHE_MIDDLEWARE_SECONDS = 1
+# # CACHE_MIDDLEWARE_SECONDS = 3600*24*7

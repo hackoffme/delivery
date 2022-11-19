@@ -4,8 +4,13 @@ from config import settings
 import requests
 from requests.auth import HTTPBasicAuth
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def create_reader():
+    logger.info(settings.api_url)
     basic = HTTPBasicAuth(settings.api_user, settings.api_password)
     res = requests.get(f'{settings.api_url}/openapi/', auth=basic)
     if res.status_code != 200:

@@ -4,27 +4,32 @@ from aiohttp.web import run_app
 from aiohttp.web_app import Application
 from aiogram import Bot, Dispatcher
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
-from aiogram.fsm.storage.redis import Redis, RedisStorage
+from aiogram.fsm.storage.redis import RedisStorage
 
 from handlers import other, start, menu, cart, order, history, about
 from middleware.worktime import WorkTime
 
+logger = logging.getLogger(__name__)
 
 TELEGRAM_TOKEN = getenv("TOKEN")
 APP_BASE_URL = getenv("APP_BASE_URL")
-
+REDIS_BOT = getenv('REDIS_BOT')
 
 async def on_startup(bot: Bot, base_url: str):
     await bot.set_webhook(f"{base_url}/bot", drop_pending_updates=True)
 
 
-async def on_shutdown(dispatcher: Dispatcher, bot: Bot):
+async def on_shutdown(dp: Dispatcher, bot: Bot):
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+    logger.info('Close storage...')
     await bot.delete_webhook()
 
 
 def register_dp():
-    dp = Dispatcher(storage=RedisStorage.from_url(url='redis://redis:6379/db'))
-
+    logger.info(REDIS_BOT)
+    dp = Dispatcher(storage=RedisStorage.from_url(url=REDIS_BOT))
+    
     dp["base_url"] = APP_BASE_URL
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
@@ -57,5 +62,5 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     main()

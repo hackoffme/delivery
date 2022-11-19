@@ -37,12 +37,12 @@ local     delivery_admin_certbot_conf
 local     delivery_admin_certbot_www
 ```
 
-Выполните команду `docker-compose up -- build django`.
+Выполните команду `docker-compose up --build django`.
 После запуска django из свободной консоли полдключимся с админке с помощью команды `docker-compose exec django bash`.
 Здесь нам надо будет применить миграции, создать суперпользователя, и если надо загрузить тестовые данные.
 ```
 #Для миграции
-pythom manage.py migrate
+python manage.py migrate
 
 #Для создания суперпользоателя(логин и пароль как в 
 #./env_file/.bot.env для пользователя api)

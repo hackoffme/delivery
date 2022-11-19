@@ -2,6 +2,7 @@ import dataclasses
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram import Router
+from aiogram import html
 from magic_filter import F
 from openapi3.errors import UnexpectedResponseError
 
@@ -37,7 +38,7 @@ async def get_address(m: types.Message, state: FSMContext):
     if m.text.lower() in allowed_commands:
         await m.answer('Отправьте адрес сообщением')
         return
-    await state.update_data({'address': m.text[0:500]})
+    await state.update_data({'address': html.quote(m.text)})
     await m.answer('Нажмите кнопку поделиться телефоном', reply_markup=get_keyboard_phone())
     await state.set_state(Order.choose_of_goods)
     await state.set_state(Order.set_phone)
