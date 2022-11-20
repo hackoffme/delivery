@@ -20,7 +20,7 @@ services:
       context: ./nginx
     container_name: ${COMPOSE_PROJECT_NAME}_nginx
     ports:
-      - $PORT:$PORT
+      # - $PORT:$PORT
       - $PORT_SSL:$PORT_SSL
     volumes:
       - certbot_conf:/etc/letsencrypt
@@ -32,7 +32,7 @@ services:
         condition: service_healthy
     environment:
       - DOMAIN=$DOMAIN
-      - PORT=$PORT
+      # - PORT=$PORT
       - PORT_SSL=$PORT_SSL
       - COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
   
@@ -74,6 +74,7 @@ services:
       start_period: 15s
     environment:
       - DOMAIN=$DOMAIN
+      - PORT_SSL=$PORT_SSL
       - SECRET_KEY=$SECRET_KEY
       - PG_HOST=$PG_HOST
       - POSTGRES_DB=$POSTGRES_DB

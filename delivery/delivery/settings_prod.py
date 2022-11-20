@@ -1,7 +1,7 @@
 import os
 import logging
 from pathlib import Path
-
+DEBUG=True
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # telegram msg
@@ -10,6 +10,7 @@ CHANEL = os.environ.get('CHANEL')
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALLOWED_HOSTS = ['djangoin', 'django', os.environ.get('DOMAIN'), f"{os.getenv('COMPOSE_PROJECT_NAME')}_django"]
+CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('DOMAIN')}:{os.getenv('PORT_SSL')}",]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
